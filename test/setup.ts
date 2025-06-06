@@ -2,7 +2,7 @@
  * テストセットアップファイル - 全テストの共通設定
  */
 import '@testing-library/jest-dom';
-import { vi } from 'vitest';
+import { vi, beforeAll, afterAll } from 'vitest';
 
 // global fetch をモック
 global.fetch = vi.fn();

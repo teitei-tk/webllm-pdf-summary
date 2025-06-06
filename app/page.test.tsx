@@ -4,7 +4,22 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import theme from './theme';
 import Home from './page';
+
+// Material-UI用のテストラッパー
+const TestWrapper = ({ children }: { children: React.ReactNode }) => (
+  <ThemeProvider theme={theme}>
+    <CssBaseline />
+    {children}
+  </ThemeProvider>
+);
+
+const renderWithTheme = (component: React.ReactElement) => {
+  return render(component, { wrapper: TestWrapper });
+};
 
 // fetch をモック
 const mockFetch = vi.fn();
@@ -23,18 +38,18 @@ describe('PDFアップロードページ', () => {
   });
 
   test('初期表示が正しく行われる', () => {
-    render(<Home />);
+    renderWithTheme(<Home />);
 
-    expect(screen.getByText('PDF要約アプリ')).toBeInTheDocument();
+    expect(screen.getByText(/PDF要約アプリ/)).toBeInTheDocument();
     expect(
-      screen.getByText('📄 PDFファイルを選択してください')
+      screen.getByText('PDFファイルを選択してください')
     ).toBeInTheDocument();
     expect(screen.getByText('ファイルを選択')).toBeInTheDocument();
   });
 
   test('PDFファイルを選択すると適切に表示される', async () => {
     const user = userEvent.setup();
-    render(<Home />);
+    renderWithTheme(<Home />);
 
     const fileInput = screen.getByTestId('pdf-file-input');
     const pdfFile = createMockFile('test.pdf', 'application/pdf');
