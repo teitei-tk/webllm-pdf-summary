@@ -1,6 +1,10 @@
 {
   "permissions": {
-    "allow": ["Bash(npm run format:check:*)"],
+    "allow": [
+      "Bash(npm run format:check:*)",
+      "Bash(npm test)",
+      "Bash(npm run format:*)"
+    ],
     "deny": []
   }
 }

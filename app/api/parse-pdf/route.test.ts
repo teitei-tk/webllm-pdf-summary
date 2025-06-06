@@ -91,7 +91,9 @@ describe('PDF解析API', () => {
 
   test('FormDataの解析でエラーが発生した場合500エラーを返す', async () => {
     // console.error をモックして stderr 出力を抑制
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
 
     const invalidRequest = {
       formData: async () => {
@@ -104,7 +106,10 @@ describe('PDF解析API', () => {
 
     expect(response.status).toBe(500);
     expect(data.error).toBe('PDFの解析中にエラーが発生しました');
-    expect(consoleErrorSpy).toHaveBeenCalledWith('PDF解析エラー:', expect.any(Error));
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'PDF解析エラー:',
+      expect.any(Error)
+    );
 
     // モックを復元
     consoleErrorSpy.mockRestore();
