@@ -8,14 +8,14 @@
 
 ## 技術スタック
 
-| レイヤ       | 技術・ライブラリ                                     | 備考                                                             |
-| --------- | -------------------------------------------- | -------------------------------------------------------------- |
-| フロント      | Next.js 15 / React 19 / Material‑UI (v6)     | 画面は `/` のみ                                                     |
-| LLM(ブラウザ) | WebLLM (wasm + WebGPU)                       | M2 Pro 36 GB RAM 向けモデル：`phi‑3‑mini`、`llama‑3‑instruct‑8B‑Q4_0` |
-| サーバ API   | Next.js API Route `/api/parse-pdf`           | `pdf-parse` または `pdfjs`、画像 PDF は `tesseract.js` で OCR 可        |
-| 一時ストレージ   | OS の `tmp` ディレクトリ                            | 処理後に削除                                                         |
-| テスト       | **Vitest + Testing Library**                 | *TDD 徹底*                                                       |
-| 静的解析      | **ESLint (`eslint:recommended`) + Prettier** | ―                                                              |
+| レイヤ         | 技術・ライブラリ                             | 備考                                                                  |
+| -------------- | -------------------------------------------- | --------------------------------------------------------------------- |
+| フロント       | Next.js 15 / React 19 / Material‑UI (v6)     | 画面は `/` のみ                                                       |
+| LLM(ブラウザ)  | WebLLM (wasm + WebGPU)                       | M2 Pro 36 GB RAM 向けモデル：`phi‑3‑mini`、`llama‑3‑instruct‑8B‑Q4_0` |
+| サーバ API     | Next.js API Route `/api/parse-pdf`           | `pdf-parse` または `pdfjs`、画像 PDF は `tesseract.js` で OCR 可      |
+| 一時ストレージ | OS の `tmp` ディレクトリ                     | 処理後に削除                                                          |
+| テスト         | **Vitest + Testing Library**                 | _TDD 徹底_                                                            |
+| 静的解析       | **ESLint (`eslint:recommended`) + Prettier** | ―                                                                     |
 
 ---
 
@@ -23,36 +23,37 @@
 
 ### UI / UX
 
-* `/` 画面のみ：PDF 選択 ▶ スピナー ▶ 要約結果カード＋コピー
-* 履歴・複数ファイル・認証なし
-* `npm run dev` で即利用
+- `/` 画面のみ：PDF 選択 ▶ スピナー ▶ 要約結果カード＋コピー
+- 履歴・複数ファイル・認証なし
+- `npm run dev` で即利用
 
 ### PDF 抽出（サーバ）
 
-* 日本語フォント・表（改行＋タブ区切り）対応
-* 画像 PDF なら `{ ocr: true }` を含めて JSON 返却
-* エラー時は `{ "error": "message" }`
+- 日本語フォント・表（改行＋タブ区切り）対応
+- 画像 PDF なら `{ ocr: true }` を含めて JSON 返却
+- エラー時は `{ "error": "message" }`
 
 ### 要約処理（クライアント）
 
-* 4 000 文字／チャンクで分割 → 部分要約 → マージ要約
-* 要約プロンプト
+- 4 000 文字／チャンクで分割 → 部分要約 → マージ要約
+- 要約プロンプト
 
   ```text
   与えられた文章を日本語で 10 行以内に要約し、重要語に ★ を付与してください。
   ```
-* 失敗時はトースト「要約に失敗しました」＋ `status` 保持
+
+- 失敗時はトースト「要約に失敗しました」＋ `status` 保持
 
 ---
 
 ## 非機能・セキュリティ
 
-| 項目       | 要件                              |
-| -------- | ------------------------------- |
-| 機密保持     | 抽出テキストのみフロント転送。PDF 本体・要約は保存しない  |
-| 性能目標     | 10 MB／200 ページ PDF を 30 秒以内に要約   |
-| アクセシビリティ | キーボード操作・`aria-label` 最低限        |
-| ロギング     | 開発時のみ `console.debug`、本番ビルドでは除去 |
+| 項目             | 要件                                                     |
+| ---------------- | -------------------------------------------------------- |
+| 機密保持         | 抽出テキストのみフロント転送。PDF 本体・要約は保存しない |
+| 性能目標         | 10 MB／200 ページ PDF を 30 秒以内に要約                 |
+| アクセシビリティ | キーボード操作・`aria-label` 最低限                      |
+| ロギング         | 開発時のみ `console.debug`、本番ビルドでは除去           |
 
 ---
 
@@ -62,11 +63,14 @@
 
    ```ts
    // 例 – 足し算関数とテスト
-   function add(a: number, b: number) { return a + b }
-   test("1+2=3", () => {
+   function add(a: number, b: number) {
+     return a + b;
+   }
+   test('1+2=3', () => {
      expect(add(1, 2)).toBe(3);
    });
    ```
+
 2. **各ファイルの冒頭に仕様コメントを記述する**
 
    ```ts
@@ -78,26 +82,30 @@
      return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
    }
    ```
+
 3. **Vitest で実装と同じファイルにユニットテストを書く**
 
    ```ts
-   export function distance(a: Point, b: Point): number { /* ... */ }
+   export function distance(a: Point, b: Point): number {
+     /* ... */
+   }
 
    if (import.meta.vitest) {
      const { test, expect } = import.meta.vitest;
-     test("ユークリッド距離を計算する", () => {
+     test('ユークリッド距離を計算する', () => {
        const result = distance({ x: 0, y: 0 }, { x: 3, y: 4 });
        expect(result).toBe(5);
      });
    }
    ```
+
 4. **コミットメッセージ** — Conventional Commits (`feat:`, `fix:` …)
 
 ---
 
 ## ディレクトリ構成（案）
 
-````text
+```text
 webllm-pdf-summary
 ├── app/
 │   ├── page.tsx                 # ルート UI (PDF アップロード & 要約表示)
@@ -112,13 +120,13 @@ webllm-pdf-summary
 ├── components/
 │   └── SummaryCard.tsx          # プレゼンテーションコンポーネント
 └── README.md
-````
+```
 
 ---
 
 ## 今後の拡張アイデア
 
-* 画像 PDF 用 OCR パイプライン
-* Cloudflare R2 + 署名付き URL で一時保存
-* モデル選択 UI（phi‑3／llama‑3 etc.）
-* SSE で要約進捗ストリーミング
+- 画像 PDF 用 OCR パイプライン
+- Cloudflare R2 + 署名付き URL で一時保存
+- モデル選択 UI（phi‑3／llama‑3 etc.）
+- SSE で要約進捗ストリーミング
