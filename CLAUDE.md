@@ -101,6 +101,8 @@
 
 4. **コミットメッセージ** — Conventional Commits (`feat:`, `fix:` …)
 
+5.	タスク実行後は必ず npm run test, npm run lint, npm run format:check を実行し、すべてエラーなしであることを確認すること
+
 ---
 
 ## ディレクトリ構成（案）
