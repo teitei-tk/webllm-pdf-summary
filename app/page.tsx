@@ -13,11 +13,37 @@ import {
   Paper,
   Chip,
   Divider,
+  ThemeProvider,
+  createTheme,
+  CssBaseline,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DescriptionIcon from '@mui/icons-material/Description';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+
+const theme = createTheme({
+  palette: {
+    mode: 'light',
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+  typography: {
+    fontFamily: [
+      '-apple-system',
+      'BlinkMacSystemFont',
+      '"Segoe UI"',
+      'Roboto',
+      '"Helvetica Neue"',
+      'Arial',
+      'sans-serif',
+    ].join(','),
+  },
+});
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
@@ -74,16 +100,18 @@ export default function Home() {
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Typography
-        variant="h1"
-        component="h1"
-        textAlign="center"
-        gutterBottom
-        sx={{ mb: 4 }}
-      >
-        📄 PDF要約アプリ
-      </Typography>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Typography
+          variant="h1"
+          component="h1"
+          textAlign="center"
+          gutterBottom
+          sx={{ mb: 4 }}
+        >
+          📄 PDF要約アプリ
+        </Typography>
 
       <Typography
         variant="body1"
@@ -225,5 +253,6 @@ export default function Home() {
         )}
       </Box>
     </Container>
+    </ThemeProvider>
   );
 }
