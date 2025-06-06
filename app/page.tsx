@@ -1,12 +1,32 @@
 'use client';
 
 import { useState } from 'react';
+import {
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Button,
+  Box,
+  Alert,
+  CircularProgress,
+  Paper,
+  Chip,
+  Divider,
+} from '@mui/material';
+import {
+  CloudUpload as CloudUploadIcon,
+  Description as DescriptionIcon,
+  ContentCopy as ContentCopyIcon,
+  CheckCircle as CheckCircleIcon,
+} from '@mui/icons-material';
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -48,70 +68,164 @@ export default function Home() {
     }
   };
 
+  const handleCopy = async () => {
+    if (!result) return;
+    await navigator.clipboard.writeText(result);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-center mb-8">PDF要約アプリ</h1>
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      <Typography
+        variant="h1"
+        component="h1"
+        textAlign="center"
+        gutterBottom
+        sx={{ mb: 4 }}
+      >
+        📄 PDF要約アプリ
+      </Typography>
 
-        <div className="max-w-2xl mx-auto space-y-6">
-          {/* ファイル選択 */}
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-            <input
-              type="file"
-              accept="application/pdf"
-              onChange={handleFileChange}
-              className="hidden"
-              id="pdf-upload"
-              data-testid="pdf-file-input"
-            />
-            <label htmlFor="pdf-upload" className="cursor-pointer block">
-              <div className="text-gray-600 mb-4">
-                📄 PDFファイルを選択してください
-              </div>
-              <div className="bg-blue-500 text-white px-6 py-2 rounded-lg inline-block hover:bg-blue-600 transition-colors">
-                ファイルを選択
-              </div>
-            </label>
-            {file && (
-              <div className="mt-4 text-sm text-gray-600">
-                選択中: {file.name}
-              </div>
-            )}
-          </div>
+      <Typography
+        variant="body1"
+        textAlign="center"
+        color="text.secondary"
+        sx={{ mb: 4 }}
+      >
+        PDFファイルをアップロードして、AIによる自動要約を行います
+      </Typography>
 
-          {/* アップロードボタン */}
-          {file && (
-            <button
-              onClick={handleUpload}
-              disabled={isLoading}
-              className="w-full bg-green-500 text-white py-3 px-6 rounded-lg hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {/* ファイル選択カード */}
+        <Card>
+          <CardContent>
+            <Box
+              sx={{
+                border: '2px dashed',
+                borderColor: file ? 'primary.main' : 'grey.300',
+                borderRadius: 2,
+                p: 4,
+                textAlign: 'center',
+                bgcolor: file ? 'primary.50' : 'background.paper',
+                transition: 'all 0.3s',
+                '&:hover': {
+                  borderColor: 'primary.main',
+                  bgcolor: 'primary.50',
+                },
+              }}
             >
-              {isLoading ? '解析中...' : 'PDFを解析する'}
-            </button>
-          )}
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+                id="pdf-upload"
+                data-testid="pdf-file-input"
+              />
+              <label htmlFor="pdf-upload" style={{ cursor: 'pointer' }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <CloudUploadIcon
+                    sx={{ fontSize: 48, color: 'primary.main', mx: 'auto' }}
+                  />
+                  <Typography variant="h6" color="text.primary">
+                    PDFファイルを選択してください
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    component="span"
+                    startIcon={<DescriptionIcon />}
+                    sx={{ mx: 'auto', maxWidth: 200 }}
+                  >
+                    ファイルを選択
+                  </Button>
+                </Box>
+              </label>
 
-          {/* エラー表示 */}
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
+              {file && (
+                <Box sx={{ mt: 3 }}>
+                  <Chip
+                    icon={<CheckCircleIcon />}
+                    label={`選択中: ${file.name}`}
+                    color="primary"
+                    variant="outlined"
+                  />
+                </Box>
+              )}
+            </Box>
+          </CardContent>
+        </Card>
 
-          {/* 結果表示 */}
-          {result && (
-            <div className="bg-gray-50 border rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">解析結果</h2>
-              <div className="whitespace-pre-wrap text-sm">{result}</div>
-              <button
-                onClick={() => navigator.clipboard.writeText(result)}
-                className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+        {/* アップロードボタン */}
+        {file && (
+          <Button
+            variant="contained"
+            size="large"
+            onClick={handleUpload}
+            disabled={isLoading}
+            startIcon={
+              isLoading ? <CircularProgress size={20} /> : <CloudUploadIcon />
+            }
+            sx={{ py: 2 }}
+          >
+            {isLoading ? '解析中...' : 'PDFを解析する'}
+          </Button>
+        )}
+
+        {/* エラー表示 */}
+        {error && (
+          <Alert severity="error" sx={{ borderRadius: 2 }}>
+            {error}
+          </Alert>
+        )}
+
+        {/* 結果表示 */}
+        {result && (
+          <Card>
+            <CardContent>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  mb: 2,
+                }}
               >
-                コピー
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+                <Typography variant="h5" component="h2">
+                  解析結果
+                </Typography>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={handleCopy}
+                  startIcon={copied ? <CheckCircleIcon /> : <ContentCopyIcon />}
+                  color={copied ? 'success' : 'primary'}
+                >
+                  {copied ? 'コピー完了' : 'コピー'}
+                </Button>
+              </Box>
+              <Divider sx={{ mb: 2 }} />
+              <Paper
+                variant="outlined"
+                sx={{
+                  p: 2,
+                  bgcolor: 'background.default',
+                  maxHeight: 400,
+                  overflow: 'auto',
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  component="pre"
+                  sx={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}
+                >
+                  {result}
+                </Typography>
+              </Paper>
+            </CardContent>
+          </Card>
+        )}
+      </Box>
+    </Container>
   );
 }
