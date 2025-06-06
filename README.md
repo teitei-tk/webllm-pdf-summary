@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# webllm-pdf-summary
 
-## Getting Started
+## 概要
 
-First, run the development server:
+**webllm-pdf-summary**は、契約書などのPDFファイルをアップロードし、その内容をWebLLM（ローカル実行の大規模言語モデル）で要約できるPoC（Proof of Concept）アプリケーションです。
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **PDFのテキスト抽出はサーバーサイド（Next.js API）で実施**
+- **要約処理はクライアント（WebLLM・ユーザーPC上）で完結**
+- **商用利用や本格運用を目的としない、検証用のプロトタイプ**
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 主な機能
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- PDFファイルを1つ選択してアップロード
+- サーバーサイドで日本語対応のテキスト抽出を実施
+- テキスト抽出後、WebLLMで要約（フロントエンドのみで実行）
+- 要約結果を画面上に表示（コピー可能）
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 要件・仕様
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **UI/体験**
+  - シンプルな画面構成（Material-UI使用）
+  - PDFアップロード後に要約結果を表示
+  - 複数ファイル対応や履歴管理は不要
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **PDFパース**
+  - Next.jsのAPIルート(`/api`)でテキスト抽出を行う
+  - 日本語PDF・表組みを可能な限り正確にテキスト化
+  - テキスト抽出結果のみフロントエンドに返却（ファイルは一時保存のみ）
 
-## Deploy on Vercel
+- **WebLLM（要約）**
+  - LLMモデルはPoCに適した軽量なもの（M2 Pro/36GB RAMで動作するモデルを利用）
+  - 長文PDFは自動分割・部分要約で対応
+  - 汎用的な要約プロンプトを利用
+  - 要約失敗時は「要約に失敗しました」と表示（将来の拡張も考慮した構造）
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Next.js構成**
+  - サーバーはPDFパースのみ担当、要約はクライアント側のみで実施
+  - ファイル・テキストの保存は一時的なもののみ
+  - ユーザー認証不要、ローカル開発環境でのみ利用想定
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 利用シーン
+
+- 社内や個人のPoC・検証用途
+- 契約書や各種日本語PDFをローカル環境で安全に要約したい場合
+
+---
+
+## 注意事項
+
+- 本リポジトリはあくまでPoC用途です。
+- 機密性の高いデータを扱う場合は、必ずローカル環境・自己責任でご利用ください。
+- 本番環境での利用、商用利用は想定していません。
