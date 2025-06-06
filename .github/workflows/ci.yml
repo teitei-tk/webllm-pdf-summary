@@ -1,12 +1,12 @@
-name: Lint
+name: CI
 
 on:
   push:
   pull_request:
 
 jobs:
-  lint:
-    name: ESLint and Prettier
+  ci:
+    name: Lint, Format & Test
     runs-on: ubuntu-latest
 
     steps:
@@ -27,3 +27,6 @@ jobs:
 
       - name: Check Prettier formatting
         run: npm run format:check
+
+      - name: Run tests
+        run: npm run test
