@@ -3,6 +3,9 @@
  */
 import { NextRequest } from 'next/server';
 import { POST } from './route';
+import fs from 'fs';
+import path from 'path';
+import { vi, describe, test, expect, beforeEach } from 'vitest';
 
 // pdf2jsonをモック
 vi.mock('pdf2json', () => ({
@@ -44,6 +47,19 @@ const createMockRequest = (formData: FormData) => {
   } as NextRequest;
 };
 
+// 実際のPDFファイルからFileオブジェクトを作成
+const createRealPdfFile = (filename: string) => {
+  const pdfPath = path.join(process.cwd(), 'tests', 'fixtures', filename);
+  const pdfBuffer = fs.readFileSync(pdfPath);
+  const pdfBlob = new Blob([pdfBuffer], { type: 'application/pdf' });
+  const file = new File([pdfBlob], filename, { type: 'application/pdf' });
+
+  // arrayBuffer メソッドをモック
+  file.arrayBuffer = vi.fn().mockResolvedValue(pdfBuffer.buffer);
+
+  return file;
+};
+
 describe('PDF解析API', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -60,9 +76,7 @@ describe('PDF解析API', () => {
               ],
             },
             {
-              R: [
-                { T: encodeURIComponent('日本語のサンプル文章です。') },
-              ],
+              R: [{ T: encodeURIComponent('日本語のサンプル文章です。') }],
             },
           ],
         },
@@ -74,15 +88,19 @@ describe('PDF解析API', () => {
       parseBuffer: vi.fn(),
     };
 
-    MockPDFParser.mockImplementation(() => mockParserInstance as any);
+    MockPDFParser.mockImplementation(
+      () => mockParserInstance as unknown as PDFParser
+    );
 
     // イベントハンドラーをモック
-    mockParserInstance.on.mockImplementation((event: string, callback: any) => {
-      if (event === 'pdfParser_dataReady') {
-        // 非同期でコールバックを呼び出し
-        setTimeout(() => callback(mockPdfData), 0);
+    mockParserInstance.on.mockImplementation(
+      (event: string, callback: (data?: unknown) => void) => {
+        if (event === 'pdfParser_dataReady') {
+          // 非同期でコールバックを呼び出し
+          setTimeout(() => callback(mockPdfData), 0);
+        }
       }
-    });
+    );
 
     const pdfFile = createMockFile('test.pdf', 'application/pdf', 1024);
     const formData = createMockFormData(pdfFile);
@@ -143,18 +161,31 @@ describe('PDF解析API', () => {
   });
 
   test('テキストが空のPDFの場合の処理', async () => {
-    const mockPdf = {
-      numPages: 1,
-      getPage: vi.fn().mockResolvedValue({
-        getTextContent: vi.fn().mockResolvedValue({
-          items: [],
-        }),
-      }),
+    const mockPdfData = {
+      Pages: [
+        {
+          Texts: [],
+        },
+      ],
     };
 
-    mockGetDocument.mockReturnValue({
-      promise: Promise.resolve(mockPdf),
-    } as any);
+    const mockParserInstance = {
+      on: vi.fn(),
+      parseBuffer: vi.fn(),
+    };
+
+    MockPDFParser.mockImplementation(
+      () => mockParserInstance as unknown as PDFParser
+    );
+
+    // イベントハンドラーをモック
+    mockParserInstance.on.mockImplementation(
+      (event: string, callback: (data?: unknown) => void) => {
+        if (event === 'pdfParser_dataReady') {
+          setTimeout(() => callback(mockPdfData), 0);
+        }
+      }
+    );
 
     const pdfFile = createMockFile('empty.pdf', 'application/pdf', 1024);
     const formData = createMockFormData(pdfFile);
@@ -170,15 +201,29 @@ describe('PDF解析API', () => {
     expect(data.metadata.isEmpty).toBe(true);
   });
 
-  test('PDF.jsでエラーが発生した場合500エラーを返す', async () => {
+  test('pdf2jsonでエラーが発生した場合500エラーを返す', async () => {
     // console.error をモックして stderr 出力を抑制
     const consoleErrorSpy = vi
       .spyOn(console, 'error')
       .mockImplementation(() => {});
 
-    mockGetDocument.mockReturnValue({
-      promise: Promise.reject(new Error('Invalid PDF')),
-    } as any);
+    const mockParserInstance = {
+      on: vi.fn(),
+      parseBuffer: vi.fn(),
+    };
+
+    MockPDFParser.mockImplementation(
+      () => mockParserInstance as unknown as PDFParser
+    );
+
+    // エラーイベントハンドラーをモック
+    mockParserInstance.on.mockImplementation(
+      (event: string, callback: (data?: unknown) => void) => {
+        if (event === 'pdfParser_dataError') {
+          setTimeout(() => callback(new Error('Invalid PDF')), 0);
+        }
+      }
+    );
 
     const pdfFile = createMockFile('invalid.pdf', 'application/pdf', 1024);
     const formData = createMockFormData(pdfFile);
@@ -203,9 +248,23 @@ describe('PDF解析API', () => {
       .spyOn(console, 'error')
       .mockImplementation(() => {});
 
-    mockGetDocument.mockReturnValue({
-      promise: Promise.reject(new Error('PDF is encrypted')),
-    } as any);
+    const mockParserInstance = {
+      on: vi.fn(),
+      parseBuffer: vi.fn(),
+    };
+
+    MockPDFParser.mockImplementation(
+      () => mockParserInstance as unknown as PDFParser
+    );
+
+    // 暗号化エラーイベントハンドラーをモック
+    mockParserInstance.on.mockImplementation(
+      (event: string, callback: (data?: unknown) => void) => {
+        if (event === 'pdfParser_dataError') {
+          setTimeout(() => callback(new Error('PDF is encrypted')), 0);
+        }
+      }
+    );
 
     const pdfFile = createMockFile('encrypted.pdf', 'application/pdf', 1024);
     const formData = createMockFormData(pdfFile);
@@ -215,24 +274,47 @@ describe('PDF解析API', () => {
     const data = await response.json();
 
     expect(response.status).toBe(500);
-    expect(data.error).toBe('暗号化されたPDFは対応していません');
+    expect(data.error).toBe('パスワード保護されたPDFは対応していません');
 
     consoleErrorSpy.mockRestore();
   });
 
   test('テキストの前処理が正しく動作する', async () => {
-    const mockPdf = {
-      numPages: 1,
-      getPage: vi.fn().mockResolvedValue({
-        getTextContent: vi.fn().mockResolvedValue({
-          items: [{ str: 'Line 1\r\nLine 2\rLine 3\n\n\n\nLine 4  ' }],
-        }),
-      }),
+    const mockPdfData = {
+      Pages: [
+        {
+          Texts: [
+            {
+              R: [
+                {
+                  T: encodeURIComponent(
+                    'Line 1\r\nLine 2\rLine 3\n\n\n\nLine 4  '
+                  ),
+                },
+              ],
+            },
+          ],
+        },
+      ],
     };
 
-    mockGetDocument.mockReturnValue({
-      promise: Promise.resolve(mockPdf),
-    } as any);
+    const mockParserInstance = {
+      on: vi.fn(),
+      parseBuffer: vi.fn(),
+    };
+
+    MockPDFParser.mockImplementation(
+      () => mockParserInstance as unknown as PDFParser
+    );
+
+    // イベントハンドラーをモック
+    mockParserInstance.on.mockImplementation(
+      (event: string, callback: (data?: unknown) => void) => {
+        if (event === 'pdfParser_dataReady') {
+          setTimeout(() => callback(mockPdfData), 0);
+        }
+      }
+    );
 
     const pdfFile = createMockFile('test.pdf', 'application/pdf', 1024);
     const formData = createMockFormData(pdfFile);
@@ -243,6 +325,62 @@ describe('PDF解析API', () => {
 
     expect(response.status).toBe(200);
     expect(data.text).toBe('Line 1\nLine 2\nLine 3\n\nLine 4');
+  });
+  test('実際のPDFファイルを使用したテスト', async () => {
+    // 実際のPDFファイルを使用
+    const realPdfFile = createRealPdfFile('contract.pdf');
+    const formData = createMockFormData(realPdfFile);
+    const request = createMockRequest(formData);
+
+    // モックを設定（実際のPDFファイルに対して）
+    const mockPdfData = {
+      Pages: [
+        {
+          Texts: [
+            {
+              R: [{ T: encodeURIComponent('契約書サンプル') }],
+            },
+            {
+              R: [
+                { T: encodeURIComponent('この文書は契約書のサンプルです。') },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    const mockParserInstance = {
+      on: vi.fn(),
+      parseBuffer: vi.fn(),
+    };
+
+    MockPDFParser.mockImplementation(
+      () => mockParserInstance as unknown as PDFParser
+    );
+
+    // イベントハンドラーをモック
+    mockParserInstance.on.mockImplementation(
+      (event: string, callback: (data?: unknown) => void) => {
+        if (event === 'pdfParser_dataReady') {
+          setTimeout(() => callback(mockPdfData), 0);
+        }
+      }
+    );
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.text).toContain('契約書サンプル');
+    expect(data.text).toContain('この文書は契約書のサンプルです。');
+    expect(data.metadata).toEqual({
+      filename: 'contract.pdf',
+      size: expect.any(Number),
+      type: 'application/pdf',
+      pages: 1,
+      extractedLength: data.text.length,
+    });
   });
 });
 

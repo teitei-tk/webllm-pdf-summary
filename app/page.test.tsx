@@ -4,14 +4,25 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
-import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import theme from './theme';
 import Home from './page';
 
 // Material-UI用のテストラッパー
+const testTheme = createTheme({
+  palette: {
+    mode: 'light',
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+});
+
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <ThemeProvider theme={theme}>
+  <ThemeProvider theme={testTheme}>
     <CssBaseline />
     {children}
   </ThemeProvider>

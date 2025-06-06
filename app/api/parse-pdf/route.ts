@@ -37,9 +37,20 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(arrayBuffer);
 
     // pdf2jsonを使用してPDFを解析
-    const pdfParser = new (PDFParser as any)(null, 1);
-    
-    const pdfData = await new Promise<any>((resolve, reject) => {
+    const pdfParser = new (PDFParser as unknown as new (
+      arg1: null,
+      arg2: number
+    ) => PDFParser)(null, 1);
+
+    interface PDFData {
+      Pages?: Array<{
+        Texts?: Array<{
+          R?: Array<{ T?: string }>;
+        }>;
+      }>;
+    }
+
+    const pdfData = await new Promise<PDFData>((resolve, reject) => {
       pdfParser.on('pdfParser_dataError', reject);
       pdfParser.on('pdfParser_dataReady', resolve);
       pdfParser.parseBuffer(buffer);
@@ -48,11 +59,11 @@ export async function POST(request: NextRequest) {
     // テキストを抽出
     let extractedText = '';
     if (pdfData.Pages && pdfData.Pages.length > 0) {
-      pdfData.Pages.forEach((page: any) => {
+      pdfData.Pages.forEach((page) => {
         if (page.Texts && page.Texts.length > 0) {
-          page.Texts.forEach((textObj: any) => {
+          page.Texts.forEach((textObj) => {
             if (textObj.R && textObj.R.length > 0) {
-              textObj.R.forEach((run: any) => {
+              textObj.R.forEach((run) => {
                 if (run.T) {
                   extractedText += decodeURIComponent(run.T) + ' ';
                 }
@@ -101,9 +112,15 @@ export async function POST(request: NextRequest) {
     // pdf2json特有のエラーをハンドリング
     let errorMessage = 'PDFの解析中にエラーが発生しました';
     if (error instanceof Error) {
-      if (error.message.includes('Invalid PDF') || error.message.includes('PDF parsing error')) {
+      if (
+        error.message.includes('Invalid PDF') ||
+        error.message.includes('PDF parsing error')
+      ) {
         errorMessage = '無効なPDFファイルです';
-      } else if (error.message.includes('password') || error.message.includes('encrypted')) {
+      } else if (
+        error.message.includes('password') ||
+        error.message.includes('encrypted')
+      ) {
         errorMessage = 'パスワード保護されたPDFは対応していません';
       }
     }
