@@ -13,13 +13,37 @@ import {
   Paper,
   Chip,
   Divider,
+  ThemeProvider,
+  createTheme,
+  CssBaseline,
 } from '@mui/material';
-import {
-  CloudUpload as CloudUploadIcon,
-  Description as DescriptionIcon,
-  ContentCopy as ContentCopyIcon,
-  CheckCircle as CheckCircleIcon,
-} from '@mui/icons-material';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import DescriptionIcon from '@mui/icons-material/Description';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+
+const theme = createTheme({
+  palette: {
+    mode: 'light',
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+  typography: {
+    fontFamily: [
+      '-apple-system',
+      'BlinkMacSystemFont',
+      '"Segoe UI"',
+      'Roboto',
+      '"Helvetica Neue"',
+      'Arial',
+      'sans-serif',
+    ].join(','),
+  },
+});
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
@@ -76,156 +100,163 @@ export default function Home() {
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Typography
-        variant="h1"
-        component="h1"
-        textAlign="center"
-        gutterBottom
-        sx={{ mb: 4 }}
-      >
-        📄 PDF要約アプリ
-      </Typography>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Typography
+          variant="h1"
+          component="h1"
+          textAlign="center"
+          gutterBottom
+          sx={{ mb: 4 }}
+        >
+          📄 PDF要約アプリ
+        </Typography>
 
-      <Typography
-        variant="body1"
-        textAlign="center"
-        color="text.secondary"
-        sx={{ mb: 4 }}
-      >
-        PDFファイルをアップロードして、AIによる自動要約を行います
-      </Typography>
+        <Typography
+          variant="body1"
+          textAlign="center"
+          color="text.secondary"
+          sx={{ mb: 4 }}
+        >
+          PDFファイルをアップロードして、AIによる自動要約を行います
+        </Typography>
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-        {/* ファイル選択カード */}
-        <Card>
-          <CardContent>
-            <Box
-              sx={{
-                border: '2px dashed',
-                borderColor: file ? 'primary.main' : 'grey.300',
-                borderRadius: 2,
-                p: 4,
-                textAlign: 'center',
-                bgcolor: file ? 'primary.50' : 'background.paper',
-                transition: 'all 0.3s',
-                '&:hover': {
-                  borderColor: 'primary.main',
-                  bgcolor: 'primary.50',
-                },
-              }}
-            >
-              <input
-                type="file"
-                accept="application/pdf"
-                onChange={handleFileChange}
-                style={{ display: 'none' }}
-                id="pdf-upload"
-                data-testid="pdf-file-input"
-              />
-              <label htmlFor="pdf-upload" style={{ cursor: 'pointer' }}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <CloudUploadIcon
-                    sx={{ fontSize: 48, color: 'primary.main', mx: 'auto' }}
-                  />
-                  <Typography variant="h6" color="text.primary">
-                    PDFファイルを選択してください
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    component="span"
-                    startIcon={<DescriptionIcon />}
-                    sx={{ mx: 'auto', maxWidth: 200 }}
-                  >
-                    ファイルを選択
-                  </Button>
-                </Box>
-              </label>
-
-              {file && (
-                <Box sx={{ mt: 3 }}>
-                  <Chip
-                    icon={<CheckCircleIcon />}
-                    label={`選択中: ${file.name}`}
-                    color="primary"
-                    variant="outlined"
-                  />
-                </Box>
-              )}
-            </Box>
-          </CardContent>
-        </Card>
-
-        {/* アップロードボタン */}
-        {file && (
-          <Button
-            variant="contained"
-            size="large"
-            onClick={handleUpload}
-            disabled={isLoading}
-            startIcon={
-              isLoading ? <CircularProgress size={20} /> : <CloudUploadIcon />
-            }
-            sx={{ py: 2 }}
-          >
-            {isLoading ? '解析中...' : 'PDFを解析する'}
-          </Button>
-        )}
-
-        {/* エラー表示 */}
-        {error && (
-          <Alert severity="error" sx={{ borderRadius: 2 }}>
-            {error}
-          </Alert>
-        )}
-
-        {/* 結果表示 */}
-        {result && (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          {/* ファイル選択カード */}
           <Card>
             <CardContent>
               <Box
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  mb: 2,
+                  border: '2px dashed',
+                  borderColor: file ? 'primary.main' : 'grey.300',
+                  borderRadius: 2,
+                  p: 4,
+                  textAlign: 'center',
+                  bgcolor: file ? 'primary.50' : 'background.paper',
+                  transition: 'all 0.3s',
+                  '&:hover': {
+                    borderColor: 'primary.main',
+                    bgcolor: 'primary.50',
+                  },
                 }}
               >
-                <Typography variant="h5" component="h2">
-                  解析結果
-                </Typography>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={handleCopy}
-                  startIcon={copied ? <CheckCircleIcon /> : <ContentCopyIcon />}
-                  color={copied ? 'success' : 'primary'}
-                >
-                  {copied ? 'コピー完了' : 'コピー'}
-                </Button>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  onChange={handleFileChange}
+                  style={{ display: 'none' }}
+                  id="pdf-upload"
+                  data-testid="pdf-file-input"
+                />
+                <label htmlFor="pdf-upload" style={{ cursor: 'pointer' }}>
+                  <Box
+                    sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+                  >
+                    <CloudUploadIcon
+                      sx={{ fontSize: 48, color: 'primary.main', mx: 'auto' }}
+                    />
+                    <Typography variant="h6" color="text.primary">
+                      PDFファイルを選択してください
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      component="span"
+                      startIcon={<DescriptionIcon />}
+                      sx={{ mx: 'auto', maxWidth: 200 }}
+                    >
+                      ファイルを選択
+                    </Button>
+                  </Box>
+                </label>
+
+                {file && (
+                  <Box sx={{ mt: 3 }}>
+                    <Chip
+                      icon={<CheckCircleIcon />}
+                      label={`選択中: ${file.name}`}
+                      color="primary"
+                      variant="outlined"
+                    />
+                  </Box>
+                )}
               </Box>
-              <Divider sx={{ mb: 2 }} />
-              <Paper
-                variant="outlined"
-                sx={{
-                  p: 2,
-                  bgcolor: 'background.default',
-                  maxHeight: 400,
-                  overflow: 'auto',
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  component="pre"
-                  sx={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}
-                >
-                  {result}
-                </Typography>
-              </Paper>
             </CardContent>
           </Card>
-        )}
-      </Box>
-    </Container>
+
+          {/* アップロードボタン */}
+          {file && (
+            <Button
+              variant="contained"
+              size="large"
+              onClick={handleUpload}
+              disabled={isLoading}
+              startIcon={
+                isLoading ? <CircularProgress size={20} /> : <CloudUploadIcon />
+              }
+              sx={{ py: 2 }}
+            >
+              {isLoading ? '解析中...' : 'PDFを解析する'}
+            </Button>
+          )}
+
+          {/* エラー表示 */}
+          {error && (
+            <Alert severity="error" sx={{ borderRadius: 2 }}>
+              {error}
+            </Alert>
+          )}
+
+          {/* 結果表示 */}
+          {result && (
+            <Card>
+              <CardContent>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 2,
+                  }}
+                >
+                  <Typography variant="h5" component="h2">
+                    解析結果
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={handleCopy}
+                    startIcon={
+                      copied ? <CheckCircleIcon /> : <ContentCopyIcon />
+                    }
+                    color={copied ? 'success' : 'primary'}
+                  >
+                    {copied ? 'コピー完了' : 'コピー'}
+                  </Button>
+                </Box>
+                <Divider sx={{ mb: 2 }} />
+                <Paper
+                  variant="outlined"
+                  sx={{
+                    p: 2,
+                    bgcolor: 'background.default',
+                    maxHeight: 400,
+                    overflow: 'auto',
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    component="pre"
+                    sx={{ whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}
+                  >
+                    {result}
+                  </Typography>
+                </Paper>
+              </CardContent>
+            </Card>
+          )}
+        </Box>
+      </Container>
+    </ThemeProvider>
   );
 }
