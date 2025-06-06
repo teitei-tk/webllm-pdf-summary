@@ -14,12 +14,10 @@ import {
   Chip,
   Divider,
 } from '@mui/material';
-import {
-  CloudUpload as CloudUploadIcon,
-  Description as DescriptionIcon,
-  ContentCopy as ContentCopyIcon,
-  CheckCircle as CheckCircleIcon,
-} from '@mui/icons-material';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import DescriptionIcon from '@mui/icons-material/Description';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
