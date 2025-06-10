@@ -380,7 +380,6 @@ describe('PDFアップロードページ', () => {
 
   test('タブ切り替えでコピー対象が変わる', async () => {
     const user = userEvent.setup();
-    const writeTextSpy = vi.spyOn(navigator.clipboard, 'writeText');
     
     const mockResponse = {
       text: '抽出されたテキスト',
