@@ -72,11 +72,11 @@ describe('useWebLLM Hook', () => {
 
   test('初期化されていない状態では初期化エラーが優先される', async () => {
     const { result } = renderHook(() => useWebLLM());
-    
+
     // 空のテキストでも、初期化エラーが先に発生する
-    await expect(
-      result.current.summarizeText('')
-    ).rejects.toThrow('AI モデルが初期化されていません');
+    await expect(result.current.summarizeText('')).rejects.toThrow(
+      'AI モデルが初期化されていません'
+    );
   });
 });
 
@@ -86,7 +86,7 @@ describe('WebLLM テキスト分割機能', () => {
     // 実際の分割ロジックをテストするため、関数を直接テスト
     const longText = 'あ'.repeat(3000);
     expect(longText.length).toBeGreaterThan(2500);
-    
+
     // 分割機能はhook内部の実装なので、ここでは長さのみ確認
     expect(longText.length).toBe(3000);
   });

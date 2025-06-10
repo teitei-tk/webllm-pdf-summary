@@ -63,7 +63,7 @@ describe('PDFアップロードページ', () => {
   beforeEach(() => {
     mockFetch.mockReset();
     vi.clearAllMocks();
-    
+
     // デフォルトのWebLLM状態をリセット
     mockWebLLM.isInitializing = false;
     mockWebLLM.isInitialized = true;
@@ -244,7 +244,9 @@ describe('PDFアップロードページ', () => {
 
     renderWithTheme(<Home />);
 
-    expect(screen.getByText(/AI初期化エラー: 初期化エラーです/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/AI初期化エラー: 初期化エラーです/)
+    ).toBeInTheDocument();
     expect(screen.getByText('再試行')).toBeInTheDocument();
   });
 
@@ -362,7 +364,7 @@ describe('PDFアップロードページ', () => {
 
     // 自動要約が呼ばれないことを確認（WebLLMが未初期化のため）
     expect(mockWebLLM.summarizeText).not.toHaveBeenCalled();
-    
+
     // 抽出テキストタブの内容を確認
     expect(screen.getByText('テストテキスト')).toBeInTheDocument();
   });
@@ -380,7 +382,7 @@ describe('PDFアップロードページ', () => {
 
   test('タブ切り替えでコピー対象が変わる', async () => {
     const user = userEvent.setup();
-    
+
     const mockResponse = {
       text: '抽出されたテキスト',
       metadata: { filename: 'test.pdf', size: 1024, type: 'application/pdf' },
@@ -406,7 +408,7 @@ describe('PDFアップロードページ', () => {
     // タブが存在することを確認
     expect(screen.getByText('抽出テキスト')).toBeInTheDocument();
     expect(screen.getByText('AI要約')).toBeInTheDocument();
-    
+
     // コピーボタンが存在することを確認
     expect(screen.getByText('コピー')).toBeInTheDocument();
   });
