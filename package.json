@@ -11,7 +11,12 @@
     "format:check": "prettier --check .",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "marp": "npx @marp-team/marp-cli doc/presentation.md -o doc/presentation.html --html",
+    "marp:pdf": "npx @marp-team/marp-cli doc/presentation.md -o doc/presentation.pdf --allow-local-files",
+    "marp:pptx": "npx @marp-team/marp-cli doc/presentation.md -o doc/presentation.pptx",
+    "marp:watch": "npx @marp-team/marp-cli doc/presentation.md -w --server --html",
+    "marp:mermaid": "npx @marp-team/marp-cli doc/presentation.md -o doc/presentation.html --html --engine @marp-team/marp-core/lib/marp.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

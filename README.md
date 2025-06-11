@@ -54,6 +54,41 @@
 
 ---
 
+## 📊 プレゼンテーション
+
+Marpを使用したプレゼンテーションスライドが利用できます：
+
+```bash
+# HTML形式でスライド生成
+npm run marp
+
+# PDF形式でスライド生成
+npm run marp:pdf
+
+# PowerPoint形式でスライド生成
+npm run marp:pptx
+
+# ライブプレビュー（ファイル監視）
+npm run marp:watch
+```
+
+プレゼンテーション資料は `doc/` ディレクトリに格納されています。
+
+---
+
+## 📁 プロジェクト構造
+
+```
+├── app/                    # Next.js アプリケーション
+├── doc/                    # プレゼンテーション資料
+│   ├── presentation.md     # Marpスライド
+│   ├── *.png              # 画像ファイル
+│   └── *.html/pdf/pptx    # 生成されたスライド
+└── example.pdf            # サンプルPDFファイル
+```
+
+---
+
 ## 注意事項
 
 - 本リポジトリはあくまでPoC用途です。
