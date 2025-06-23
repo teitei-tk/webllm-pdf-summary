@@ -45,7 +45,7 @@ style: |
   }
 ---
 
-# 📄 WebLLMを利用した日本語テキスト要約
+# Claude Code × WebLLM：AI駆動開発で作る次世代PDF要約ツール
 
 ## ブラウザで完結するAI搭載PDF要約ツール
 
